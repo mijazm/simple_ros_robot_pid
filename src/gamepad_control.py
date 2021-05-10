@@ -5,9 +5,9 @@
 
 # References:
 # 1. https://github.com/PacktPublishing/ROS-Robotics-By-Example
+# 2. https://github.com/PacktPublishing/ROS-Robotics-By-Example/blob/master/Chapter_8_code/Turtlesim_joy_code/turtlesim_joy.py
 
-
-# Code for robot at https://github.com/mijazm/Simple_ROS_Arduino
+# Arduino code for robot at https://github.com/mijazm/ROS_Arduino_PID
 
 import rospy
 from std_msgs.msg import String

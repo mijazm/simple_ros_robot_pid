@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-# This code generates odometry information from encoder ticks of a robot
+# This code generates PID Control by reading encoder ticks from motor
 # Author: Mijaz Mukundan
 
 import math
