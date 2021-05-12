@@ -15,7 +15,7 @@ from geometry_msgs.msg import Point, Pose, Quaternion, Twist, Vector3
 #Parameters
 wheeltrack = 0.35
 wheelradius = 0.035
-TPR = 600
+TPR = 1380
 left_ticks = 0
 right_ticks = 0
 last_left_ticks = 0
