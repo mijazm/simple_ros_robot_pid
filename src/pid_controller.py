@@ -13,7 +13,7 @@ from std_msgs.msg import Int16
 from geometry_msgs.msg import Twist
 
 #Parameters
-wheeltrack = 0.35
+wheeltrack = 0.37
 wheelradius = 0.035
 TPR = 1380 #Ticks per revolution from the SPG30E-200K DC Geared Motor with Encoder Datasheet
 
@@ -46,25 +46,25 @@ def rightTicksCallback(msg):
 def cmdVelCallback(msg):
     global motor_req_rpm
 
-    linear_vel = msg.linear.x
-    angular_vel = msg.angular.z
+    linear_vel = msg.linear.x*0.25
+    angular_vel = msg.angular.z*5
 
     if angular_vel == 0:
         motor_req_rpm['left'] = linear_vel*60 / (2*pi*wheelradius)
         motor_req_rpm['right'] = motor_req_rpm['left']
     
     elif linear_vel == 0:
-        motor_req_rpm['right'] = (wheeltrack/2)*angular_vel*60 / (2*pi*wheelradius)
-        motor_req_rpm['left'] = -motor_req_rpm['left']
+        motor_req_rpm['right'] = (wheeltrack/2)*angular_vel*60 /(2*(2*pi*wheelradius))
+        motor_req_rpm['left'] = -motor_req_rpm['right']
     
     else:
-        motor_req_rpm['left'] = (linear_vel-(wheeltrack/2)*angular_vel)*60/(2*pi*wheelradius)
-        motor_req_rpm['right'] = (linear_vel+(wheeltrack/2)*angular_vel)*60/(2*pi*wheelradius)
+        motor_req_rpm['left'] = (linear_vel-(wheeltrack/4)*angular_vel)*60/(2*pi*wheelradius)
+        motor_req_rpm['right'] = (linear_vel+(wheeltrack/4)*angular_vel)*60/(2*pi*wheelradius)
     
     # print("LRPM:{},RRPM:{}".format(motor_req_rpm['left'],motor_req_rpm['right']))
 
 def calc_pid(req_val,act_val,motor_id):
-    Kp = 3
+    Kp = 5
     Ki = 0
     Kd = 0
     global last_error, int_error
@@ -116,8 +116,8 @@ while not rospy.is_shutdown():
     right_motor_act_rpm = delta_R / TPR * (60/dt)
 
     # print("ACT RPM:")
-    # print("l:{},r:{}".format(left_motor_act_rpm,right_motor_act_rpm))
-    # print("rl:{},rr:{}".format(motor_req_rpm['left'],motor_req_rpm['right']))
+    print("l:{},r:{}".format(left_motor_act_rpm,right_motor_act_rpm))
+    print("rl:{},rr:{}".format(motor_req_rpm['left'],motor_req_rpm['right']))
     
     #Motor PID term calculation
     left_pid = calc_pid(motor_req_rpm['left'],left_motor_act_rpm,motor_id='left')
