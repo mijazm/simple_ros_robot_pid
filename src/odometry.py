@@ -54,27 +54,32 @@ while not rospy.is_shutdown():
 
     delta_L = left_ticks - last_left_ticks
     delta_R = right_ticks - last_right_ticks
+
     dl = 2 * pi * wheelradius * delta_L / TPR
     dr = 2 * pi * wheelradius * delta_R / TPR
+
     dc = (dl + dr) / 2
     dt = (current_time - last_time).to_sec()
     dth = (dr-dl)/wheeltrack
 
     if dr==dl:
-        dx=dr*cos(th)
-        dy=dr*sin(th)
+        dx=dc*cos(th)
+        dy=dc*sin(th)
 
     else:
+        # Here radius is the distance between ICC and centre of mass of the robot
         radius=dc/dth
 
         iccX=x-radius*sin(th)
         iccY=y+radius*cos(th)
 
         dx = cos(dth) * (x-iccX) - sin(dth) * (y-iccY) + iccX - x
-        dy = sin(dth) * (x-iccX) + cos(dt) * (y-iccY) + iccY - y
+        dy = sin(dth) * (x-iccX) + cos(dth) * (y-iccY) + iccY - y
 
     x += dx  
     y += dy 
+    #Here the modulus operation ensures that the calculated angle is always between zero
+    #2*pi radians
     th =(th+dth) %  (2 * pi)
 
     odom_quat = tf.transformations.quaternion_from_euler(0, 0, th)

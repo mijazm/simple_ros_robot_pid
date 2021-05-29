@@ -45,7 +45,11 @@ def rightTicksCallback(msg):
 
 def cmdVelCallback(msg):
     global motor_req_rpm
-
+    
+    # We will now scale the input received from the gamepad to get 
+    # the values of linear and angular speeds in the desired range,
+    # this way we can scale the desired RPM so that the controller 
+    # can generate values which can get you to full speed.
     linear_vel = msg.linear.x*0.25
     angular_vel = msg.angular.z*5
 
