@@ -9,13 +9,13 @@ from math import sin, cos, pi
 import rospy
 import tf
 from nav_msgs.msg import Odometry
-from std_msgs.msg import Int16
+from std_msgs.msg import Int16,Float32
 from geometry_msgs.msg import Twist
 
 #Parameters
-wheeltrack = 0.37
+wheeltrack = 0.332
 wheelradius = 0.035
-TPR = 1380 #Ticks per revolution from the SPG30E-200K DC Geared Motor with Encoder Datasheet
+TPR = 1400 #Ticks per revolution from the SPG30E-200K DC Geared Motor with Encoder Datasheet
 
 
 motors = [('left',0), ('right',0)]
@@ -50,7 +50,7 @@ def cmdVelCallback(msg):
     # the values of linear and angular speeds in the desired range,
     # this way we can scale the desired RPM so that the controller 
     # can generate values which can get you to full speed.
-    linear_vel = msg.linear.x*0.25
+    linear_vel = msg.linear.x
     angular_vel = msg.angular.z*5
 
     if angular_vel == 0:
@@ -100,6 +100,8 @@ right_ticks_sub =rospy.Subscriber("/rwheel", Int16, rightTicksCallback)
 
 #Publish to ..
 pid_pub = rospy.Publisher("/pid_control", Twist, queue_size=1)
+rvel_pub = rospy.Publisher("/rvel",Float32, queue_size=1)
+lvel_pub = rospy.Publisher("/lvel",Float32, queue_size=1)
 
 
 last_time = rospy.Time.now()
@@ -134,6 +136,14 @@ while not rospy.is_shutdown():
     
     #Publish the control message
     pid_pub.publish(ctrl_msg)
+
+    rvel_msg = Float32()
+    rvel_msg.data=right_motor_act_rpm
+    rvel_pub.publish(rvel_msg)
+
+    lvel_msg = Float32()
+    lvel_msg.data=left_motor_act_rpm
+    lvel_pub.publish(lvel_msg)
 
     
     last_ticks['left'] = ticks['left']

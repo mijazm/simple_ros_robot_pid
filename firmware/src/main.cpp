@@ -12,29 +12,18 @@ References:
 3. https://dronebotworkshop.com/rotary-encoders-arduino/
 4. https://github.com/sungjik/my_personal_robotic_companion
 
-Corressponding ROS code at https://github.com/mijazm/simple_ros_robot_pid
-
 **/
 #include <Arduino.h>
 #include <L298N.h>
-#include "MPU9250.h"
 
 // Arduino – ROS headers
 #include <ros.h>
 #include <std_msgs/Empty.h>
 #include <ros/time.h>
 #include <std_msgs/Int16.h>
-#include <std_msgs/Int32.h>
-#include <std_msgs/Float32.h>
-#include <std_msgs/String.h>
 #include <geometry_msgs/Twist.h>
 
 #define LOOPTIME 100 //Update time in ms
-
-// an MPU9250 object with the MPU-9250 sensor on I2C bus 0 with address 0x68
-MPU9250 IMU(Wire,0x68);
-int status;
-String AX,AY,AZ,GX,GY,GZ,MX,MY,MZ,Tmp;
 
 // Pin definition for right motor
 const unsigned int IN1 = 4;
@@ -55,8 +44,8 @@ uint8_t left_pwm;
 L298N right_motor(EN12, IN1, IN2);
 L298N::Direction right_motor_direction;
 uint8_t right_pwm;
+
 //Defining Encoder Pins
-// Pins for the SPG30E-200K DC Geared Motor with Encoder.
 // Left Motor Encoder
 const int ML_A = 2;
 const int ML_B = 3;
@@ -75,9 +64,6 @@ ros::Publisher lwheelPub("lwheel", &lwheelMsg);
 std_msgs::Int16 rwheelMsg;
 ros::Publisher rwheelPub("rwheel", &rwheelMsg);
 
-//IMU publisher
-std_msgs::String imuMsg;
-ros::Publisher imuPub("raw_imu",&imuMsg);
 
 //callback function when a control message is received
 void rover_control(const geometry_msgs::Twist& ctrl_msg)
@@ -150,11 +136,6 @@ void rightAChange() {
 
 void setup() {
   
-   //begin serial communication
-  Serial1.begin(115200);
-  // start communication with IMU 
-  status = IMU.begin();
-  
   left_pwm = 0;
   right_pwm = 0;
   //Stop Motors
@@ -183,30 +164,6 @@ void setup() {
 void loop() {
   
   unsigned long current_time = millis();
-  
-  // IMU.readSensor();
-
-  // AX=String(IMU.getAccelX_mss());
-  // AY=String(IMU.getAccelY_mss());
-  // AZ=String(IMU.getAccelZ_mss());
-  
-  // GX=String(IMU.getGyroX_rads());
-  // GY=String(IMU.getGyroY_rads());
-  // GZ=String(IMU.getGyroZ_rads());
-  
-  // MX=String(IMU.getMagX_uT());
-  // MY=String(IMU.getMagY_uT());
-  // MZ=String(IMU.getMagZ_uT());
-  
-  // Tmp=String(IMU.getTemperature_C());
-
-  // String data = "A" + AX + "B"+ AY + "C" + AZ + "D" + GX + "E" + GY + "F" + GZ + "G";
-  
-  // Serial1.println(data);
-
-  // int length = data.indexOf("G") +2;
-  // char data_final[length+1];
-  // data.toCharArray(data_final, length+1);
 
   if((current_time-last_time) >= LOOPTIME){
   
@@ -216,14 +173,12 @@ void loop() {
   interrupts();
 
 
-
+  // Publish the wheel ticks
   lwheelMsg.data = (int) curLwheel;
   rwheelMsg.data = (int) curRwheel;
   lwheelPub.publish(&lwheelMsg);
   rwheelPub.publish(&rwheelMsg);
 
-  // imuMsg.data = data_final;
-  // imuPub.publish(&imuMsg);
   
   lastLwheel = curLwheel;
   lastRwheel = curRwheel;
